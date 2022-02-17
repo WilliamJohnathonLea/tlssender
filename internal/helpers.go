@@ -8,7 +8,9 @@ import (
 )
 
 func ConnectTCP(hostAndPort string) (*tls.Conn, error) {
-	tlsConf := &tls.Config{}
+	tlsConf := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
 	return tls.Dial("tcp", hostAndPort, tlsConf)
 }
 
