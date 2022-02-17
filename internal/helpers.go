@@ -23,10 +23,12 @@ func bytesToTCPMessage(msg []byte) []byte {
 }
 
 func parseResponse(bytes []byte) string {
+	dataLen := binary.LittleEndian.Uint32(bytes[:4])
+	bytesToRead := 4 + dataLen
 	// We need to exlcude the 1st four bytes
 	// because they simply indicate the length
 	// of the message
-	return string(bytes[4:])
+	return string(bytes[4:bytesToRead])
 }
 
 func handleAck(bytes []byte) error {

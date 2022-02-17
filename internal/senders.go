@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+// The maximum size of a TCP frame in bytes
+const maxFrameSize = 256
+
 // SendFile sends the contents of a file to a TCP connection.
 // filepath is the path to the data to be sent.
 // conn is the connection where the data will be sent.
@@ -17,12 +20,12 @@ func SendFile(filepath string, conn *tls.Conn, ack bool) error {
 	}
 	_, err = conn.Write(bytesToTCPMessage(bytes))
 	if ack {
-		respBytes := make([]byte, 256)
-		_, err = conn.Read(respBytes)
+		respBytes := make([]byte, maxFrameSize)
+		nRead, err := conn.Read(respBytes)
 		if err != nil {
 			return err
 		}
-		return handleAck(respBytes)
+		return handleAck(respBytes[:nRead])
 	}
 	return err
 }
