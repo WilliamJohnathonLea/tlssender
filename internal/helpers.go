@@ -4,68 +4,20 @@ import (
 	"crypto/tls"
 	"encoding/binary"
 	"errors"
-	"log"
+	"io"
 	"net"
 	"strings"
 )
 
-func ConnectTCP(hostAndPort string) (net.Conn, error) {
+func connectTCP(hostAndPort string, useSecureConnection bool) (io.ReadWriteCloser, error) {
+	if useSecureConnection {
+		tlsConf := &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+		return tls.Dial("tcp", hostAndPort, tlsConf)
+	}
+
 	return net.Dial("tcp", hostAndPort)
-}
-
-func HandleFile(hostAndPort, filepath string, ack bool) {
-	conn, err := ConnectTCP(hostAndPort)
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err.Error())
-	}
-	defer conn.Close()
-	err = SendFile(filepath, conn, ack)
-	if err != nil {
-		log.Fatalf("failed while sending file: %v", err)
-	}
-}
-
-func HandleDir(hostAndPort, dirpath string, ack bool) {
-	conn, err := ConnectTCP(hostAndPort)
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err.Error())
-	}
-	defer conn.Close()
-	err = SendDir(dirpath, conn, ack)
-	if err != nil {
-		log.Fatalf("failed while sending files: %v", err)
-	}
-}
-
-func ConnectSecureTCP(hostAndPort string) (*tls.Conn, error) {
-	tlsConf := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-	}
-	return tls.Dial("tcp", hostAndPort, tlsConf)
-}
-
-func SecureHandleFile(hostAndPort, filepath string, ack bool) {
-	conn, err := ConnectSecureTCP(hostAndPort)
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err.Error())
-	}
-	defer conn.Close()
-	err = SecureSendFile(filepath, conn, ack)
-	if err != nil {
-		log.Fatalf("failed while sending file: %v", err)
-	}
-}
-
-func SecureHandleDir(hostAndPort, dirpath string, ack bool) {
-	conn, err := ConnectSecureTCP(hostAndPort)
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err.Error())
-	}
-	defer conn.Close()
-	err = SecureSendDir(dirpath, conn, ack)
-	if err != nil {
-		log.Fatalf("failed while sending files: %v", err)
-	}
 }
 
 func bytesToTCPMessage(msg []byte) []byte {

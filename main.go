@@ -30,21 +30,13 @@ func main() {
 		hostAndPort := fileCmd.Arg(0)
 		filepath := fileCmd.Arg(1)
 
-		if useSecureConnection {
-			internal.SecureHandleFile(hostAndPort, filepath, ack)
-		} else {
-			internal.HandleFile(hostAndPort, filepath, ack)
-		}
+		internal.HandleFile(hostAndPort, filepath, ack, useSecureConnection)
 	case dirCmdStr:
 		dirCmd.Parse(os.Args[2:])
 		hostAndPort := dirCmd.Arg(0)
 		dir := dirCmd.Arg(1)
 
-		if useSecureConnection {
-			internal.SecureHandleDir(hostAndPort, dir, ack)
-		} else {
-			internal.HandleDir(hostAndPort, dir, ack)
-		}
+		internal.HandleDir(hostAndPort, dir, ack, useSecureConnection)
 	default:
 		log.Fatalf("expected subcommand '%s' or '%s'", fileCmdStr, dirCmdStr)
 	}
