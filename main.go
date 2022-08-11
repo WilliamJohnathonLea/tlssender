@@ -37,8 +37,8 @@ func main() {
 		}
 	case dirCmdStr:
 		dirCmd.Parse(os.Args[2:])
-		hostAndPort := fileCmd.Arg(0)
-		dir := fileCmd.Arg(1)
+		hostAndPort := dirCmd.Arg(0)
+		dir := dirCmd.Arg(1)
 
 		if useSecureConnection {
 			internal.SecureHandleDir(hostAndPort, dir, ack)
