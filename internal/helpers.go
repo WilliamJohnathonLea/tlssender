@@ -20,11 +20,15 @@ func connectTCP(hostAndPort string, useSecureConnection bool) (io.ReadWriteClose
 	return net.Dial("tcp", hostAndPort)
 }
 
-func bytesToTCPMessage(msg []byte) []byte {
+func bytesToTCPMessage(msg []byte, useBigEndian bool) []byte {
 	size := len(msg)
 	sizeBuff := make([]byte, 4) // 32-bit unsigned int
 
-	binary.LittleEndian.PutUint32(sizeBuff, uint32(size))
+	if useBigEndian {
+		binary.BigEndian.PutUint32(sizeBuff, uint32(size))
+	} else {
+		binary.LittleEndian.PutUint32(sizeBuff, uint32(size))
+	}
 
 	out := append(sizeBuff, msg...)
 	return out

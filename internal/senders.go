@@ -2,7 +2,6 @@ package internal
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -13,12 +12,12 @@ const maxFrameSize = 256
 // filepath is the path to the data to be sent.
 // conn is the connection where the data will be sent.
 // if ack is == true then we will make sure the data was received with an 'OK'
-func sendFile(filepath string, conn io.ReadWriteCloser, ack bool) error {
+func sendFile(filepath string, conn io.ReadWriteCloser, ack, useBigEndian bool) error {
 	bytes, err := os.ReadFile(filepath)
 	if err != nil {
 		return err
 	}
-	_, err = conn.Write(bytesToTCPMessage(bytes))
+	_, err = conn.Write(bytesToTCPMessage(bytes, useBigEndian))
 	if ack {
 		respBytes := make([]byte, maxFrameSize)
 		nRead, err := conn.Read(respBytes)
@@ -34,14 +33,14 @@ func sendFile(filepath string, conn io.ReadWriteCloser, ack bool) error {
 // dirpath is the path to the data directory.
 // conn is the connection where the data will be sent.
 // If ack is == true then we will make sure the data was received with an 'OK'
-func sendDir(dirpath string, conn io.ReadWriteCloser, ack bool) error {
-	files, err := ioutil.ReadDir(dirpath)
+func sendDir(dirpath string, conn io.ReadWriteCloser, ack, useBigEndian bool) error {
+	files, err := os.ReadDir(dirpath)
 	if err != nil {
 		return err
 	}
 	for _, f := range files {
 		filepath := dirpath + "/" + f.Name()
-		err = sendFile(filepath, conn, ack)
+		err = sendFile(filepath, conn, ack, useBigEndian)
 		if err != nil {
 			return err
 		}
